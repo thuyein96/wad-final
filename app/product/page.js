@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const API_BASE = process.env.NEXT_PUBLIC_API_URL;
   console.debug("API_BASE", API_BASE);
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, reset, setValue } = useForm();
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   async function fetchProducts() {
     const data = await fetch(`${API_BASE}/product`);
@@ -24,13 +25,34 @@ export default function Home() {
   }
 
   const createProduct = (data) => {
-    fetch(`${API_BASE}/product`, {
-      method: "POST",
+    const method = editingProduct ? "PUT" : "POST";
+    const url = editingProduct ? `${API_BASE}/product/${editingProduct._id}` : `${API_BASE}/product`;
+    
+    fetch(url, {
+      method: method,
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    }).then(() => fetchProducts());
+    }).then(() => {
+      fetchProducts();
+      setEditingProduct(null);
+      reset();
+    });
+  };
+
+  const editProduct = (product) => {
+    setEditingProduct(product);
+    setValue("code", product.code);
+    setValue("name", product.name);
+    setValue("description", product.description);
+    setValue("price", product.price);
+    setValue("category", product.category);
+  };
+
+  const cancelEdit = () => {
+    setEditingProduct(null);
+    reset();
   };
 
   const deleteById = (id) => async () => {
@@ -50,6 +72,7 @@ export default function Home() {
   return (
     <div className="flex flex-row gap-4">
       <div className="flex-1 w-64 ">
+        <h2 className="text-xl font-bold m-4">{editingProduct ? "Edit Product" : "Add New Product"}</h2>
         <form onSubmit={handleSubmit(createProduct)}>
           <div className="grid grid-cols-2 gap-4 m-4 w-1/2">
             <div>Code:</div>
@@ -102,9 +125,18 @@ export default function Home() {
             <div className="col-span-2">
               <input
                 type="submit"
-                value="Add"
-                className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                value={editingProduct ? "Update" : "Add"}
+                className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
               />
+              {editingProduct && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="bg-gray-500 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded-full"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
         </form>
@@ -114,8 +146,9 @@ export default function Home() {
         <ul className="list-disc ml-8">
           {
             products.map((p) => (
-              <li key={p._id}>
-                <button className="border border-black p-1/2" onClick={deleteById(p._id)}>❌</button>{' '}
+              <li key={p._id} className={editingProduct?._id === p._id ? "bg-yellow-100 p-2 rounded" : ""}>
+                <button className="border border-black p-1/2 mr-1" onClick={deleteById(p._id)}>❌</button>
+                <button className="border border-black p-1/2 mr-2" onClick={() => editProduct(p)}>✏️</button>
                 <Link href={`/product/${p._id}`} className="font-bold">
                   {p.name}
                 </Link>{" "}

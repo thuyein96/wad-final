@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 
 import CategoryForm from "@/app/v2/components/forms/CategoryForm";
+import ResponsiveAppBar from "../components/ResponsiveAppBar";
 import Link from "next/link";
 
 import { DataGrid, GridToolbar , GridRowsProp, GridColDef } from "@mui/x-data-grid";
@@ -22,15 +23,25 @@ import AddBoxIcon from "@mui/icons-material/AddBox";
 
 export default function Home() {
   const [category, setCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [editMode, setEditMode] = useState(false);
   const columns = [
     { field: "name", headerName: "Category Name", width: 150 },
-    // { field: 'col2', headerName: 'Column 2', width: 150 },
+    { field: 'order', headerName: 'Order', width: 150 },
+    { field: 'actions', headerName: 'Actions', width: 150, renderCell: (params) => {
+        return (
+          <div>
+            <button onClick={() => startEditMode(params.row)}>📝</button>
+            <button onClick={() => deleteCategory(params.row)}>🗑️</button>
+          </div>
+        )
+      }},
   ];
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL;
   console.log(`${API_BASE}/category`);
   async function fetchCategory() {
-    const data = await fetch(`${APIBASE}/category`);
+    const data = await fetch(`${API_BASE}/category`);
     const c = await data.json();
     const c2 = c.map((category) => {
       category.id = category._id;
@@ -40,42 +51,74 @@ export default function Home() {
   }
 
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    setEditMode(false);
+    setSelectedCategory(null);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setEditMode(false);
+    setSelectedCategory(null);
+  };
 
   useEffect(() => {
     fetchCategory();
   }, []);
 
+  function startEditMode(category) {
+    // console.log(category)
+    setSelectedCategory(category);
+    setEditMode(true);
+    setOpen(true);
+  }
+
+  function stopEditMode() {
+    setSelectedCategory(null);
+    setEditMode(false);
+    setOpen(false);
+  }
+
   function handleCategoryFormSubmit(data) {
-    if (editMode) {
-      // data.id = data._id
-      fetch(`${APIBASE}/category`, {
+    if (editMode && selectedCategory) {
+      fetch(`${API_BASE}/category/${selectedCategory._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       }).then(() => {
-        reset({ name: '', order: '' })
-        fetchCategory()
+        fetchCategory();
+        handleClose();
       });
-      return
+      return;
     }
-    fetch(`${APIBASE}/category`, {
+    fetch(`${API_BASE}/category`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     }).then(() => {
-      reset({ name: '', order: '' })
-      fetchCategory()
+      fetchCategory();
+      handleClose();
     });
   }
 
+  async function deleteCategory(category) {
+    if (!confirm(`Are you sure to delete [${category.name}]`)) return;
+
+    const id = category._id
+    await fetch(`${API_BASE}/category/${id}`, {
+      method: "DELETE"
+    })
+    fetchCategory()
+  }
+
   return (
-    <main>
+    <>
+      <ResponsiveAppBar />
+      <main>
       {/* <form onSubmit={handleSubmit(createCategory)}>
         <div className="grid grid-cols-2 gap-4 w-fit m-4">
           <div>Category:</div>
@@ -135,7 +178,11 @@ export default function Home() {
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
-          <CategoryForm onSubmit={handleCategoryFormSubmit} />
+          <CategoryForm 
+            onSubmit={handleCategoryFormSubmit} 
+            category={selectedCategory}
+            editMode={editMode}
+          />
         </Modal>
         <DataGrid
           slots={{
@@ -146,5 +193,6 @@ export default function Home() {
         />
       </div>
     </main>
+    </>
   );
 }

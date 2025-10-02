@@ -18,15 +18,20 @@ const style = {
   p: 4,
 };
 
-export default function CategoryForm(handler) {
-  const { register, handleSubmit } = useForm();
+export default function CategoryForm({ onSubmit, category, editMode }) {
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: {
+      name: category?.name || '',
+      order: category?.order || ''
+    }
+  });
   return (
     <Box sx={style}>
       <Typography id="modal-modal-title" variant="h6" component="h2">
-        Text in a modal
+        {editMode ? 'Edit Category' : 'Add Category'}
       </Typography>
       <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-        <form onSubmit={handleSubmit(handler)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-4 w-fit m-4">
             <div>Category:</div>
             <div>
@@ -36,13 +41,32 @@ export default function CategoryForm(handler) {
                 {...register("name", { required: true })}
                 className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               />
+              
+            </div>
+            <div>Order:</div>
+            <div>
+              <input
+                name="order"
+                type="number"
+                {...register("order", { required: true })}
+                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              />
             </div>
             <div className="col-span-2">
               <input
                 type="submit"
-                value="Add"
-                className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                value={editMode ? "Update" : "Add"}
+                className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
               />
+              {editMode && (
+                <button
+                  type="button"
+                  onClick={() => reset()}
+                  className="bg-gray-500 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded-full"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
         </form>

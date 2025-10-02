@@ -8,6 +8,13 @@ export async function GET(request, { params }) {
   return Response.json(product);
 }
 
+export async function PUT(request, { params }) {
+  const id = params.id;
+  const data = await request.json();
+  const product = await Product.findByIdAndUpdate(id, data, { new: true }).populate("category");
+  return Response.json(product);
+}
+
 export async function DELETE(request, { params }) {
   const id = params.id;
   return Response.json(await Product.findByIdAndDelete(id));
