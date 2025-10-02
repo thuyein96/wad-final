@@ -1,23 +1,6 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/category/[id]/route": "app/api/category/[id]/route.js",
-  "/api/category/route": "app/api/category/route.js",
-  "/api/customer/[id]/route": "app/api/customer/[id]/route.js",
-  "/api/customer/route": "app/api/customer/route.js",
-  "/category/page": "app/category/page.js",
-  "/api/product/route": "app/api/product/route.js",
-  "/customer/[id]/page": "app/customer/[id]/page.js",
-  "/api/product/[id]/route": "app/api/product/[id]/route.js",
-  "/customer/new/page": "app/customer/new/page.js",
-  "/customer/page": "app/customer/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/product/[id]/page": "app/product/[id]/page.js",
-  "/v2/category/page": "app/v2/category/page.js",
-  "/product/page": "app/product/page.js",
-  "/v2/page": "app/v2/page.js",
-  "/v2/customer/page": "app/v2/customer/page.js",
-  "/v2/product/[id]/page": "app/v2/product/[id]/page.js",
-  "/v2/product/page": "app/v2/product/page.js",
-  "/v2/customer/[id]/page": "app/v2/customer/[id]/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/v2/page": "app/v2/page.js"
 }
