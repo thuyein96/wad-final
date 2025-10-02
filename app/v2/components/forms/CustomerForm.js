@@ -11,6 +11,7 @@ export default function CustomerForm({ customer, onSave, onCancel }) {
   });
   const [error, setError] = useState('');
   const router = useRouter();
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,8 +26,8 @@ export default function CustomerForm({ customer, onSave, onCancel }) {
       if (formData.interests) {
         formData.interests = formData.interests.split(',').map(interest => interest.trim());
       }
-      
-      const res = await fetch(customer ? `/api/customer/${customer._id}` : '/api/customer', {
+
+      const res = await fetch(customer ? `${API_BASE}/customer/${customer._id}` : `${API_BASE}/customer`, {
         method: customer ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
